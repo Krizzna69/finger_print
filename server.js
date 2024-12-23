@@ -1,6 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const { MongoClient } = require('mongodb'); // MongoDB Node.js driver
+const { MongoClient } = require('mongodb');
 const { generateRegistrationOptions, verifyRegistrationResponse } = require('@simplewebauthn/server');
 const { generateAuthenticationOptions, verifyAuthenticationResponse } = require('@simplewebauthn/server');
 const crypto = require('crypto');
@@ -9,7 +9,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // MongoDB connection details
-const mongoUri = "mongodb+srv://jaswanthuchiha69:pjkss17@cluster0.hpctd.mongodb.net/"; // Replace with your cluster info
+const mongoUri = "mongodb+srv://<username>:<password>@<cluster-url>/myAppDB?retryWrites=true&w=majority"; // Replace with your cluster info
 let db, usersCollection;
 
 // Connect to MongoDB
@@ -26,15 +26,14 @@ MongoClient.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true 
 // Middleware
 app.use(bodyParser.json());
 
-// POST: Register a new user
+// POST: Register a new user (Fingerprint is captured as part of registration)
 app.post('/api/register-user', async (req, res) => {
     const { username, credential } = req.body;
 
     try {
-        // Store the user's fingerprint data (public key) in the MongoDB database
         const userDoc = {
             username,
-            credential,  // Store credential information (e.g., public key, client data)
+            credential, // Store the credential (public key, etc.) for later use
             challenge: credential.response.clientDataJSON,  // Store the challenge for verification
         };
 
@@ -46,7 +45,7 @@ app.post('/api/register-user', async (req, res) => {
     }
 });
 
-// GET: Retrieve registration options
+// GET: Retrieve registration options (for the client to register a new fingerprint)
 app.get('/api/get-register-options', (req, res) => {
     const options = generateRegistrationOptions({
         rpName: "MyApp",
@@ -59,7 +58,7 @@ app.get('/api/get-register-options', (req, res) => {
     res.json({ publicKey: options });
 });
 
-// POST: Verify registration response
+// POST: Verify registration response (verify fingerprint)
 app.post('/api/verify-registration', async (req, res) => {
     const { username, credential } = req.body;
 
@@ -88,7 +87,7 @@ app.post('/api/verify-registration', async (req, res) => {
     }
 });
 
-// GET: Retrieve login options
+// GET: Retrieve login options (for fingerprint login)
 app.get('/api/get-login-options', (req, res) => {
     const options = generateAuthenticationOptions({
         rpID: "example.com",
@@ -98,7 +97,7 @@ app.get('/api/get-login-options', (req, res) => {
     res.json({ publicKey: options });
 });
 
-// POST: Verify login response
+// POST: Verify login response (verify fingerprint during login)
 app.post('/api/login-verify', async (req, res) => {
     const { username, credential } = req.body;
 

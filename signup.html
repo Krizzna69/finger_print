@@ -5,70 +5,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f4f4f4;
-        }
-        .container {
-            width: 100%;
-            max-width: 400px;
-            padding: 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        h2 {
-            text-align: center;
-        }
-        input[type="text"], input[type="password"], input[type="button"], input[type="submit"] {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            font-size: 16px;
-            cursor: pointer;
-        }
+        body { font-family: Arial, sans-serif; text-align: center; }
+        input { padding: 10px; margin: 10px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Sign Up</h2>
-        <input type="text" id="name" placeholder="Full Name" />
-        <input type="password" id="password" placeholder="Password" />
-        <input type="button" value="Scan Fingerprint" onclick="registerFingerprint()" />
-        <input type="submit" value="Sign Up" onclick="submitSignup()" />
-    </div>
-
+    <h1>Sign Up</h1>
+    <input type="text" id="username" placeholder="Enter username" />
+    <button onclick="registerFingerprint()">Register Fingerprint</button>
+    
     <script>
         async function registerFingerprint() {
-            const username = document.getElementById("name").value;
-            const response = await fetch("/api/get-register-options", { method: 'GET' });
+            const username = document.getElementById("username").value;
+            if (!username) {
+                alert("Please enter a username");
+                return;
+            }
+
+            // 1. Request WebAuthn registration options from the server
+            const response = await fetch("/api/get-register-options");
             const options = await response.json();
 
-            const publicKeyCredentialCreationOptions = options.publicKey;
-            const credential = await navigator.credentials.create({ publicKey: publicKeyCredentialCreationOptions });
+            // 2. Request user to register fingerprint using WebAuthn
+            const credential = await navigator.credentials.create({ publicKey: options.publicKey });
 
+            // 3. Send the credential to the backend for verification and storage
             const result = await fetch("/api/register-user", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json"
+                },
                 body: JSON.stringify({ username, credential })
             });
 
             const data = await result.json();
             if (data.success) {
                 alert("Registration successful!");
-                window.location.href = "/login"; // Redirect to login page
+                window.location.href = "/login.html"; // Redirect to login page
             } else {
-                alert("Registration failed.");
+                alert("Registration failed. Please try again.");
             }
-        }
-
-        function submitSignup() {
-            // Trigger form submission here
         }
     </script>
 </body>

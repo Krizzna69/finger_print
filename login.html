@@ -5,69 +5,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f4f4f4;
-        }
-        .container {
-            width: 100%;
-            max-width: 400px;
-            padding: 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        h2 {
-            text-align: center;
-        }
-        input[type="text"], input[type="button"], input[type="submit"] {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            font-size: 16px;
-            cursor: pointer;
-        }
+        body { font-family: Arial, sans-serif; text-align: center; }
+        input { padding: 10px; margin: 10px; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Login</h2>
-        <input type="text" id="username" placeholder="Username" />
-        <input type="button" value="Verify Fingerprint" onclick="loginWithFingerprint()" />
-        <input type="submit" value="Login" onclick="submitLogin()" />
-    </div>
-
+    <h1>Login</h1>
+    <input type="text" id="username" placeholder="Enter username" />
+    <button onclick="loginWithFingerprint()">Log in with Fingerprint</button>
+    
     <script>
         async function loginWithFingerprint() {
             const username = document.getElementById("username").value;
-            const response = await fetch("/api/get-login-options", { method: 'GET' });
+            if (!username) {
+                alert("Please enter a username");
+                return;
+            }
+
+            // 1. Request WebAuthn login options from the server
+            const response = await fetch("/api/get-login-options");
             const options = await response.json();
 
-            const publicKeyCredentialRequestOptions = options.publicKey;
-            const credential = await navigator.credentials.get({ publicKey: publicKeyCredentialRequestOptions });
+            // 2. Request fingerprint verification from the user
+            const credential = await navigator.credentials.get({ publicKey: options.publicKey });
 
+            // 3. Send the credential to the backend for verification
             const result = await fetch("/api/login-verify", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json"
+                },
                 body: JSON.stringify({ username, credential })
             });
 
             const data = await result.json();
             if (data.success) {
                 alert("Login successful!");
-                window.location.href = "/dashboard"; // Redirect to dashboard
+                window.location.href = "/dashboard.html"; // Redirect to dashboard
             } else {
-                alert("Login failed.");
+                alert("Login failed. Please try again.");
             }
-        }
-
-        function submitLogin() {
-            // Trigger form submission here
         }
     </script>
 </body>
