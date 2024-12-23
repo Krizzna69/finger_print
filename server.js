@@ -9,7 +9,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // MongoDB connection details
-const mongoUri = "mongodb+srv://<username>:<password>@<cluster-url>/myAppDB?retryWrites=true&w=majority"; // Replace with your cluster info
+const mongoUri = "mongodb+srv://jaswanthuchiha69:pjkss17@cluster0.hpctd.mongodb.net/"; // Replace with your cluster info
 let db, usersCollection;
 
 // Connect to MongoDB
