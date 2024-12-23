@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+        }
+        input[type="text"], input[type="password"], input[type="button"], input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Sign Up</h2>
+        <input type="text" id="name" placeholder="Full Name" />
+        <input type="password" id="password" placeholder="Password" />
+        <input type="button" value="Scan Fingerprint" onclick="registerFingerprint()" />
+        <input type="submit" value="Sign Up" onclick="submitSignup()" />
+    </div>
+
+    <script>
+        async function registerFingerprint() {
+            const username = document.getElementById("name").value;
+            const response = await fetch("/api/get-register-options", { method: 'GET' });
+            const options = await response.json();
+
+            const publicKeyCredentialCreationOptions = options.publicKey;
+            const credential = await navigator.credentials.create({ publicKey: publicKeyCredentialCreationOptions });
+
+            const result = await fetch("/api/register-user", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, credential })
+            });
+
+            const data = await result.json();
+            if (data.success) {
+                alert("Registration successful!");
+                window.location.href = "/login"; // Redirect to login page
+            } else {
+                alert("Registration failed.");
+            }
+        }
+
+        function submitSignup() {
+            // Trigger form submission here
+        }
+    </script>
+</body>
+</html>
