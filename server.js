@@ -27,7 +27,7 @@ MongoClient.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true 
 app.use(bodyParser.json());
 
 // POST: Register a new user (Fingerprint is captured as part of registration)
-app.post('/api/register-user', async (req, res) => {
+app.post('https://finger-print-v4py.onrender.com/register-user', async (req, res) => {
     const { username, credential } = req.body;
 
     try {
@@ -46,7 +46,7 @@ app.post('/api/register-user', async (req, res) => {
 });
 
 // GET: Retrieve registration options (for the client to register a new fingerprint)
-app.get('/api/get-register-options', (req, res) => {
+app.get('https://finger-print-v4py.onrender.com/get-register-options', (req, res) => {
     const options = generateRegistrationOptions({
         rpName: "MyApp",
         rpID: "example.com",
@@ -59,7 +59,7 @@ app.get('/api/get-register-options', (req, res) => {
 });
 
 // POST: Verify registration response (verify fingerprint)
-app.post('/api/verify-registration', async (req, res) => {
+app.post('https://finger-print-v4py.onrender.com/verify-registration', async (req, res) => {
     const { username, credential } = req.body;
 
     try {
@@ -88,7 +88,7 @@ app.post('/api/verify-registration', async (req, res) => {
 });
 
 // GET: Retrieve login options (for fingerprint login)
-app.get('/api/get-login-options', (req, res) => {
+app.get('https://finger-print-v4py.onrender.com/get-login-options', (req, res) => {
     const options = generateAuthenticationOptions({
         rpID: "example.com",
         userVerification: "required",  // This forces fingerprint authentication
@@ -98,7 +98,7 @@ app.get('/api/get-login-options', (req, res) => {
 });
 
 // POST: Verify login response (verify fingerprint during login)
-app.post('/api/login-verify', async (req, res) => {
+app.post('https://finger-print-v4py.onrender.com/login-verify', async (req, res) => {
     const { username, credential } = req.body;
 
     try {
